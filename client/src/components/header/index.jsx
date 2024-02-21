@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/images/reallogo.png";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { AiOutlineUser } from "react-icons/ai";
 import "./header.css";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,9 +37,6 @@ export default function Header() {
             <div className="nav-items header-right-items">
               <Link to="/cart">
                 <AiOutlineShoppingCart fontSize="22px" />
-              </Link>
-              <Link to={isLoggedIn ? "/account" : "/login"}>
-                <AiOutlineUser fontSize="22px" />
               </Link>
             </div>
 
