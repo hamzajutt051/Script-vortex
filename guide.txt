@@ -1,0 +1,204 @@
+-------------- Step 1 --------------
+Log in to AWS
+Launch a new EC2 instance.
+Create a elastic Ip and associate it
+Login to AWS EC2 using ssh
+
+chmod 400 "memorysquare.pem"
+
+ ssh -i "memorysquare.pem" ubuntu@ec2-13-53-251-160.eu-north-1.compute.amazonaws.com
+
+
+-------------- Step 2 --------------
+#to install node js for the first time
+
+cd ~
+curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
+
+sudo bash /tmp/nodesource_setup.sh
+
+sudo apt install nodejs
+
+node -v
+
+-------------- Step 3 --------------
+Go to your project folder in github
+Click on settings
+Select Secrets and variables from the left menu
+Click on actions
+Click on New repository secret
+Add your .env file as a secret
+
+-------------- Step 4 --------------
+Go to your project folder in github
+Click on settings
+Click on Actions from the left menu
+Click on runners 
+Click on new self hosted runner
+copy the commands and run it in your ssh terminal except the last two
+
+-------------- Step 5 --------------
+Click on Actions from the top menu
+Click on new workflow
+Choose node js and click configure
+
+Add the following code and set the paths accordingly
+
+#starts here
+name: Node.js CI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+       - name: Cache Yarn dependencies
+         uses: actions/cache@v2
+         with:
+           path: |
+             api/.yarn
+             api/node_modules
+           key: ${{ runner.os }}-yarn-${{ hashFiles('api/yarn.lock') }}
+           restore-keys: |
+             ${{ runner.os }}-yarn-
+
+       - uses: actions/checkout@v3
+         with:
+           submodules: "true"
+
+       - name: List contents of the api directory
+         run: ls -la api
+
+       - name: Use Node.js ${{ matrix.node-version }}
+         uses: actions/setup-node@v3
+         with:
+           node-version: ${{ matrix.node-version }}
+           cache: "yarn"
+           cache-dependency-path: api/yarn.lock
+
+       - name: Install Yarn
+         run: npm install -g yarn
+
+       - name: Install dependencies with Yarn
+         working-directory: ./api
+         run: yarn install --frozen-lockfile
+
+       - run: |
+           cd api
+           touch .env
+           echo "${{secrets.PROD_ENV_FILE}}" > .env
+
+       - run: pm2 restart all
+
+#ends here
+
+-------------- Step 6 --------------
+
+#install pm2
+sudo npm i pm2 -g
+
+#start pm2
+pm2 start index
+
+# Other pm2 commands
+pm2 show app
+pm2 status
+pm2 restart app
+pm2 stop app
+pm2 logs (Show log stream)
+pm2 flush (Clear logs)
+
+# To make sure app starts when reboot
+pm2 startup ubuntu
+
+
+-------------- Step 7 --------------
+edit inbound rules in aws security group ec2
+
+add the following rules
+
+HTTP TCP 80
+HTTPS TCP 443
+Custom TCP TCP 8001 for both ipv4 and ipv6  
+
+
+-------------- Step 8 --------------
+Add your domain name in aws route 53
+
+
+-------------- Step 9 --------------
+sudo apt install nginx
+
+sudo nano /etc/nginx/sites-available/default
+
+
+server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8001; #whatever port your app runs on
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+
+    # Check NGINX config
+sudo nginx -t
+
+# Restart NGINX
+sudo nginx -s reload
+
+
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+sudo apt-get install python3-certbot-nginx
+sudo certbot --nginx -d memoriessquare.ae -d www.memoriessquare.ae
+
+# Only valid for 90 days, test the renewal process with
+certbot renew --dry-run
+
+
+
+-------------- Step 10 --------------
+Authenticate with Github
+
+#run the following command in ssh terminal
+
+ls -al ~/.ssh
+ssh-keygen -t rsa -b 4096 -C "devilang704@gmail.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub
+
+#copy the output and add it to github
+
+Go to GitHub.
+In the upper-right corner of any page, click your profile photo, then click Settings.
+In the user settings sidebar, click SSH and GPG keys.
+Click New SSH key or Add SSH key.
+In the "Title" field, add a descriptive label for the new key, such as EC2-instance.
+Paste your key into the "Key" field.
+Click Add SSH key.
+
+
+change the remote url to ssh
+
+git remote set-url origin ssh://git@<your repo url>
+
+
+-------------- Step 11 --------------
+helping videos
+
+https://youtube.com/watch?v=ofBFl4M4BFk&list=LL&index=16&t=558s
+https://youtube.com/watch?v=cgWXQqL-ZU8&list=LL&index=2

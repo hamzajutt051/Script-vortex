@@ -1,0 +1,14 @@
+.ship-parent ul li {
+  text-decoration: dotted;
+}
+.ship-parent {
+  padding-top: 60px;
+
+  text-align: left;
+}
+.ship-parent h1 {
+  text-align: center;
+}
+.ship-section {
+  padding-bottom: 70px;
+}

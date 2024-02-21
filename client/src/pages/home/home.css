@@ -1,0 +1,11 @@
+.home {
+  background: #f1f1f2;
+  height: 100vh;
+}
+.home-parent h1 {
+  color: #00203e;
+}
+.home-parent {
+  display: flex;
+  align-items: center;
+}
