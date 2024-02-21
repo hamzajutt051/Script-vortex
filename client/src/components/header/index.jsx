@@ -4,10 +4,8 @@ import logo from "../../assets/images/reallogo.png";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { AiOutlineUser } from "react-icons/ai";
 import "./header.css";
-import useAuth from "../../hook/useAuth";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isLoggedIn } = useAuth();
 
   return (
     <>
